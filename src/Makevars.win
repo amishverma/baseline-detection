@@ -1,0 +1,2 @@
+CXX_STD = CXX17
+PKG_CPPFLAGS = -I"C:/Users/amish/AppData/Local/R/win-library/4.4/Rcpp/include"
