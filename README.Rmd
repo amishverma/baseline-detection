@@ -10,6 +10,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%"
+  
 )
 ```
 
@@ -26,7 +27,7 @@ You can install the development version of baselinedetection from [GitHub](https
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("amishverma/baseline-detection)
+devtools::install_github("amishverma/baseline-detection")
 ```
 
 ## Example

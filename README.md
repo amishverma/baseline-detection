@@ -17,7 +17,7 @@ You can install the development version of baselinedetection from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("amishverma/baseline-detection)
+devtools::install_github("amishverma/baseline-detection")
 ```
 
 ## Example

@@ -11,12 +11,11 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
+  
 )
 ```
 
-```{r setup}
-library(baselinedetection)
-```
+
 # Introduction
 
 This vignette will demonstrate how to use the core functions of the `yourpackagename` package. We will cover:
@@ -70,20 +69,5 @@ hull_points <- convex_hull_Spectra(spectra) # Use thE Rcpp file to cacluate the 
 
 # Plot the original, hull, and corrected spectra
 plot(spectra, hull_points = hull_points, corrected_spectrum = corrected_spectra)
-
-```
-
-# Example
-
-```{r}
- library(baselinedetection)
-  wavelength <- seq(400, 700, length.out = 100)
-  intensity <- sin(wavelength / 100) + rnorm(100, sd = 0.05)
-  spectra <- as.Spectra(wavelength, intensity)
-  corrected_spectrum <- baseline_correct_Spectra(spectra)
-  hull_points <- convex_hull(spectra)
-  plot(spectra)
-  plot(spectra,hull_points=hull_points, corrected_spectrum = corrected_spectrum)
-  plot_spectra_corrected(corrected_spectrum)
 
 ```
