@@ -1,0 +1,89 @@
+---
+title: "Baseline"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Baseline}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(baselinedetection)
+```
+# Introduction
+
+This vignette will demonstrate how to use the core functions of the `yourpackagename` package. We will cover:
+
+1. Importing spectral data from a CSV file.
+2. Creating a `Spectra` object.
+3. Performing baseline correction on the spectra.
+4. Plotting the original and corrected spectra, along with the convex hull.
+
+
+### Why Convex Hull and Baseline Correction?
+
+When working with spectral data, it is common to encounter noise and background signals that can obscure the true features of the spectrum. To address this, we use **baseline correction**, a process that removes the unwanted background signal, allowing us to focus on the actual data of interest.
+
+A common method for baseline correction is to use the **convex hull**. In simple terms, the convex hull is the smallest "envelope" that can completely enclose the data points of a spectrum. Imagine stretching a rubber band around the outermost points of the spectrum; the shape formed by the rubber band is analogous to the convex hull. By subtracting this envelope from the original spectrum, we effectively remove the background noise, resulting in a "flattened" spectrum that highlights the true peaks and valleys of the data.
+
+In this vignette, we will show you how to perform these steps using the `baselinedetection`package.
+
+
+# Importing Spectral Data
+
+We start by importing spectral data from a CSV file using the `import_spectra` function. This function reads the data, checks that the required columns (`wavelength` and `intensity`) are present, and creates a `Spectra` object.
+
+```{r, echo=TRUE}
+library(baselinedetection)
+
+# The CSV file has columns "wavelength" and "intensity"
+file_path <- system.file("extdata", "test_spectra.csv", package = "baselinedetection")
+spectra <- import_spectra(file_path)
+
+print(spectra)
+```
+
+# Baseline Correction
+
+Next, we use the baseline_correct_Spectra function to correct the baseline of the spectra. This function calculates the convex hull of the spectrum and subtracts it to correct the baseline.
+
+```{r}
+corrected_spectra <- baseline_correct_Spectra(spectra)
+
+print(corrected_spectra)
+
+
+```
+# Plotting the spectra
+
+Finally, we plot the original spectrum, the convex hull, and the baseline-corrected spectrum using the plot.Spectra function.
+
+```{r}
+hull_points <- convex_hull_Spectra(spectra) # Use thE Rcpp file to cacluate the hull points
+
+# Plot the original, hull, and corrected spectra
+plot(spectra, hull_points = hull_points, corrected_spectrum = corrected_spectra)
+
+```
+
+# Example
+
+```{r}
+ library(baselinedetection)
+  wavelength <- seq(400, 700, length.out = 100)
+  intensity <- sin(wavelength / 100) + rnorm(100, sd = 0.05)
+  spectra <- as.Spectra(wavelength, intensity)
+  corrected_spectrum <- baseline_correct_Spectra(spectra)
+  hull_points <- convex_hull(spectra)
+  plot(spectra)
+  plot(spectra,hull_points=hull_points, corrected_spectrum = corrected_spectrum)
+  plot_spectra_corrected(corrected_spectrum)
+
+```
