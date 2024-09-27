@@ -29,16 +29,16 @@ This vignette will demonstrate how to use the core functions of the `yourpackage
 
 ### Why Convex Hull and Baseline Correction?
 
-When working with spectral data, it is common to encounter noise and background signals that can obscure the true features of the spectrum. To address this, we use **baseline correction**, a process that removes the unwanted background signal, allowing us to focus on the actual data of interest.
+When working with spectral data, it is common to encounter noise and background signals that can obscure the true features of the spectrum. To address this, we use baseline correction, a process that removes the unwanted background signal, allowing us to focus on the actual data of interest.
 
-A common method for baseline correction is to use the **convex hull**. In simple terms, the convex hull is the smallest "envelope" that can completely enclose the data points of a spectrum. Imagine stretching a rubber band around the outermost points of the spectrum; the shape formed by the rubber band is analogous to the convex hull. By subtracting this envelope from the original spectrum, we effectively remove the background noise, resulting in a "flattened" spectrum that highlights the true peaks and valleys of the data.
+A common method for baseline correction is to use the convex hull. In simple terms, the convex hull is the smallest "envelope" that can completely enclose the data points of a spectrum. Imagine stretching a rubber band around the outermost points of the spectrum; the shape formed by the rubber band is analogous to the convex hull. By subtracting this envelope from the original spectrum, we effectively remove the background noise, resulting in a "flattened" spectrum that highlights the true peaks and valleys of the data.
 
-In this vignette, we will show you how to perform these steps using the `baselinedetection`package.
+In this vignette, we will show you how to perform these steps using the baselinedetection package.
 
 
 # Importing Spectral Data
 
-We start by importing spectral data from a CSV file using the `import_spectra` function. This function reads the data, checks that the required columns (`wavelength` and `intensity`) are present, and creates a `Spectra` object.
+We start by importing spectral data from a CSV file using the import_spectra function. This function reads the data, checks that the required columns (wavelength and intensity) are present, and creates a Spectra object.
 
 ```{r, echo=TRUE}
 library(baselinedetection)

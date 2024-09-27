@@ -470,3 +470,5 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,r,c,c++,latex
 inst/doc
+/doc/
+/Meta/
