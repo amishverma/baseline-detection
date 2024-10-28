@@ -15,10 +15,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r}
+library(baselinedetection)
+```
 
 # Introduction
 
-This vignette will demonstrate how to use the core functions of the `yourpackagename` package. We will cover:
+This vignette will demonstrate how to use the core functions of the `baselinedetection` package. We will cover:
 
 1. Importing spectral data from a CSV file.
 2. Creating a `Spectra` object.
@@ -26,16 +29,75 @@ This vignette will demonstrate how to use the core functions of the `yourpackage
 4. Plotting the original and corrected spectra, along with the convex hull.
 
 
-### Why Convex Hull and Baseline Correction?
 
-When working with spectral data, it is common to encounter noise and background signals that can obscure the true features of the spectrum. To address this, we use baseline correction, a process that removes the unwanted background signal, allowing us to focus on the actual data of interest.
+# 1) Background
 
-A common method for baseline correction is to use the convex hull. In simple terms, the convex hull is the smallest "envelope" that can completely enclose the data points of a spectrum. Imagine stretching a rubber band around the outermost points of the spectrum; the shape formed by the rubber band is analogous to the convex hull. By subtracting this envelope from the original spectrum, we effectively remove the background noise, resulting in a "flattened" spectrum that highlights the true peaks and valleys of the data.
+## 1.1)  History of Baseline Detection
 
-In this vignette, we will show you how to perform these steps using the baselinedetection package.
+Baseline detection has been a fundamental aspect of spectral data analysis for decades, especially in fields like chemistry and physics, where spectroscopic data often include both signal and background noise. Originally, baseline detection was done manually or through simpler smoothing techniques. With advancements in computational methods, automated baseline correction techniques have emerged, allowing for more accurate and reproducible results. Early approaches involved simple manual subtraction of background signals, but as data complexity increased, automated methods were developed. Today, baseline correction techniques are a fundamental part of data preprocessing in spectroscopy, ensuring that analyses are accurate and reproducible.
+
+## 1.2) Why is Baseline Correction Important?
+
+In spectral analysis, baseline correction is essential because it removes unwanted background signals, which can obscure the true features of the data. This helps to accurately identify and quantify peaks, essential for applications such as material identification, chemical concentration analysis, and biomolecular characterization. Proper baseline correction also improves the reliability of any downstream analysis, such as peak fitting or machine learning applications.
+
+## 1.3) Common Methods of Baseline Correction
+
+There are several methods for baseline correction, each with unique advantages and limitations:
+
++ Polynomial Fitting: Fits a polynomial to the background noise. It’s simple but may not capture complex baselines.
+
++ Asymmetric Least Squares (ALS): A widely used method that penalizes deviations from smoothness, adjusting for asymmetry.
+
++ Convex Hull: Uses the smallest convex boundary around the data points, especially useful for data with sharp changes.
 
 
-# Importing Spectral Data
+## 1.4 what is Convex Hull? 
+
+The convex hull is the smallest convex boundary that can enclose all data points in the spectrum. Think of it as stretching a rubber band around the outermost points of the spectrum to create a smooth envelope. This method effectively handles varied spectral shapes and is robust against noise, making it ideal for baseline correction in spectroscopy.
+
+The convex hull method subtracts this “envelope” from the original data, leaving a "flattened" spectrum where the true peaks and valleys are more prominent.
+
+## 1.5) Montone chain algorithim 
+
+Monotone Chain Algorithm for Convex Hull Calculation
+
+Description: The Monotone Chain Algorithm, also known as Andrew’s Monotone Chain Algorithm, is a method for constructing the convex hull of a set of points. It sorts points by their x-coordinates (and by y-coordinates if x-coordinates are the same) and then constructs the convex hull in two steps: first by building the lower hull and then by building the upper hull.
+
+Efficiency: The algorithm has a time complexity of O(nlogn), which comes from the initial sorting step. After sorting, the construction of the hull itself takes O(n), making the algorithm highly efficient and suitable for large datasets.
+
+### Approach:
+
++ Sort Points: Points are sorted by x-coordinates. If two points have the same x-coordinate, they are sorted by y-coordinates.
+
++ Build Lower Hull: Starting from the leftmost point, the algorithm adds each point to the hull while ensuring only counterclockwise turns. It uses the orientation function to check the direction of the turn formed by the last two points in the hull and the current point.
+
++ Build Upper Hull: It then constructs the upper hull in a similar fashion, moving from rightmost to  leftmost.
+
++ Combine: The points from the lower and upper hulls are combined to form the convex hull.
+
+### Orientation Function
+
+The **orientation function** determines whether three points \( p \), \( q \), and \( r \) are collinear, or if they form a clockwise or counterclockwise turn. This is essential in the convex hull algorithm to ensure that only counterclockwise turns are included in the hull.
+
+The orientation is calculated using the following formula:
+
+\[
+\text{val} = (q_y - p_y) \times (r_x - q_x) - (q_x - p_x) \times (r_y - q_y)
+\]
+
+where:
+- If \( \text{val} = 0 \), the points \( p \), \( q \), and \( r \) are **collinear**.
+
+- If \( \text{val} > 0 \), the sequence of points \( p \), \( q \), and \( r \) forms a **clockwise** turn.
+
+- If \( \text{val} < 0 \), the sequence of points \( p \), \( q \), and \( r \) forms a **counterclockwise** turn.
+
+This calculation helps in constructing the convex hull by ensuring that only points that form counterclockwise turns are added, thereby creating an "outer boundary" around the set of points.
+
+
+# 2) Using the `baselinedetection` Package
+
+## 2.1) Importing Spectral Data
 
 We start by importing spectral data from a CSV file using the import_spectra function. This function reads the data, checks that the required columns (wavelength and intensity) are present, and creates a Spectra object.
 
@@ -49,25 +111,46 @@ spectra <- import_spectra(file_path)
 print(spectra)
 ```
 
-# Baseline Correction
 
-Next, we use the baseline_correct_Spectra function to correct the baseline of the spectra. This function calculates the convex hull of the spectrum and subtracts it to correct the baseline.
+## 2.2) Convex Hull Calculation
+
+We first calculate the convex hull using the convex_hull_Spectra function, which identifies the points that form the baseline envelope.
+
+```{r}
+hull_points <- convex_hull_Spectra(spectra)
+print(hull_points)
+
+```
+
+## 2.3) Performing Baseline Correction Using Convex Hull
+
+The baseline_correct_Spectra function uses the convex hull to correct the baseline by subtracting the hull envelope from the original spectrum. Over here we use the interpolation and the approx function from base R.
 
 ```{r}
 corrected_spectra <- baseline_correct_Spectra(spectra)
-
 print(corrected_spectra)
 
-
 ```
-# Plotting the spectra
 
-Finally, we plot the original spectrum, the convex hull, and the baseline-corrected spectrum using the plot.Spectra function.
+## 2.4) Plotting the Spectra
 
-```{r}
+The plot.Spectra function visualizes the original spectrum, convex hull, and corrected spectrum.
+
+```{r plot-spectra, fig.width=7, fig.height=5}
 hull_points <- convex_hull_Spectra(spectra) # Use thE Rcpp file to cacluate the hull points
 
 # Plot the original, hull, and corrected spectra
 plot(spectra, hull_points = hull_points, corrected_spectrum = corrected_spectra)
 
 ```
+
+## 2.5) Plotting Only the Corrected Spectrum
+You can also plot just the baseline-corrected spectrum for a cleaner view of the corrected data.
+
+```{r  corrected plot-spectra, fig.width=7, fig.height=5}
+plot_spectra_corrected(corrected_spectrum = corrected_spectra)
+```
+
+# Conclusion
+
+This vignette demonstrates the core functions of the baselinedetection package, illustrating how to create, import, and plot spectral data, calculate the convex hull, and correct the baseline for clearer analysis.

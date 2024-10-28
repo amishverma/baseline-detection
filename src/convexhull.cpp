@@ -8,7 +8,7 @@ int orientation(NumericVector p, NumericVector q, NumericVector r) {
   return (val > 0) ? 1 : 2; // Clockwise or Counterclockwise
 }
 
-// Convex hull calculation function
+// Lower hull calculation function (baseline detection)
 // [[Rcpp::export]]
 NumericMatrix convex_hull_cpp(NumericMatrix points) {
   int n = points.nrow();
@@ -21,9 +21,9 @@ NumericMatrix convex_hull_cpp(NumericMatrix points) {
   }
   std::sort(sorted_points.begin(), sorted_points.end());
 
-  std::vector<int> lower_hull, upper_hull;
+  std::vector<int> lower_hull;
 
-  // Lower hull
+  // Compute lower hull only
   for (int i = 0; i < n; ++i) {
     while (lower_hull.size() >= 2 && orientation(
       NumericVector::create(sorted_points[lower_hull[lower_hull.size() - 2]].first, sorted_points[lower_hull[lower_hull.size() - 2]].second),
@@ -34,26 +34,11 @@ NumericMatrix convex_hull_cpp(NumericMatrix points) {
     lower_hull.push_back(i);
   }
 
-  // Upper hull
-  for (int i = n - 1; i >= 0; --i) {
-    while (upper_hull.size() >= 2 && orientation(
-      NumericVector::create(sorted_points[upper_hull[upper_hull.size() - 2]].first, sorted_points[upper_hull[upper_hull.size() - 2]].second),
-      NumericVector::create(sorted_points[upper_hull[upper_hull.size() - 1]].first, sorted_points[upper_hull[upper_hull.size() - 1]].second),
-      NumericVector::create(sorted_points[i].first, sorted_points[i].second)) != 2) {
-      upper_hull.pop_back();
-    }
-    upper_hull.push_back(i);
-  }
-
-  // Combine lower and upper hull
-  std::vector<int> full_hull(lower_hull.begin(), lower_hull.end());
-  full_hull.insert(full_hull.end(), upper_hull.begin() + 1, upper_hull.end() - 1);
-
-  // Convert hull points back to NumericMatrix
-  NumericMatrix hull_points(full_hull.size(), 2);
-  for (size_t i = 0; i < full_hull.size(); ++i) {
-    hull_points(i, 0) = sorted_points[full_hull[i]].first;
-    hull_points(i, 1) = sorted_points[full_hull[i]].second;
+  // Convert lower hull points back to NumericMatrix
+  NumericMatrix hull_points(lower_hull.size(), 2);
+  for (size_t i = 0; i < lower_hull.size(); ++i) {
+    hull_points(i, 0) = sorted_points[lower_hull[i]].first;
+    hull_points(i, 1) = sorted_points[lower_hull[i]].second;
   }
 
   return hull_points;
